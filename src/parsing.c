@@ -129,6 +129,7 @@ int	is_valid_map_line(char *line)
 int	check_texture_path(char *path)
 {
 	int	len;
+	int	fd;
 
 	if (!path || !*path)
 		return (0);
@@ -143,6 +144,12 @@ int	check_texture_path(char *path)
 		path[len - 2] != 'p' || 
 		path[len - 1] != 'm')
 		return (0);
+	
+	// Verificar se o arquivo existe
+	fd = open(path, O_RDONLY);
+	if (fd < 0)
+		return (0);
+	close(fd);
 	
 	return (1);
 }
@@ -236,84 +243,85 @@ void	free_map_list(t_lmapp *list)
 }
 
 
-void	parse_config_line(t_game *game, char *line)
+int	parse_config_line(t_game *game, char *line)
 {
 	static int	map_started = 0;
 
 	if (!line || line[0] == '\0')
-		return;
+		return (0);
 
 	// Verificar se é uma linha de textura ou cor
 	if (ft_strncmp(line, "NO ", 3) == 0)
 	{
 		if (map_started)
-			free_game_and_exit(game, "Erro: Textura NO definida após o início do mapa.");
+			return (-1); // Error: texture defined after map start
 		if (game->texture_paths[NORTH])
-			free_game_and_exit(game, "Erro: Textura NO duplicada.");
+			return (-6); // Error: duplicate NO texture
 		if (!check_texture_path(line + 3))
-			free_game_and_exit(game, "Erro: Caminho de textura NO inválido.");
+			return (-3); // Error: invalid texture path
 		game->texture_paths[NORTH] = ft_strdup(line + 3);
 	}
 	else if (ft_strncmp(line, "SO ", 3) == 0)
 	{
 		if (map_started)
-			free_game_and_exit(game, "Erro: Textura SO definida após o início do mapa.");
+			return (-1);
 		if (game->texture_paths[SOUTH])
-			free_game_and_exit(game, "Erro: Textura SO duplicada.");
+			return (-7); // Error: duplicate SO texture
 		if (!check_texture_path(line + 3))
-			free_game_and_exit(game, "Erro: Caminho de textura SO inválido.");
+			return (-3);
 		game->texture_paths[SOUTH] = ft_strdup(line + 3);
 	}
 	else if (ft_strncmp(line, "WE ", 3) == 0)
 	{
 		if (map_started)
-			free_game_and_exit(game, "Erro: Textura WE definida após o início do mapa.");
+			return (-1);
 		if (game->texture_paths[WEST])
-			free_game_and_exit(game, "Erro: Textura WE duplicada.");
+			return (-8); // Error: duplicate WE texture
 		if (!check_texture_path(line + 3))
-			free_game_and_exit(game, "Erro: Caminho de textura WE inválido.");
+			return (-3);
 		game->texture_paths[WEST] = ft_strdup(line + 3);
 	}
 	else if (ft_strncmp(line, "EA ", 3) == 0)
 	{
 		if (map_started)
-			free_game_and_exit(game, "Erro: Textura EA definida após o início do mapa.");
+			return (-1);
 		if (game->texture_paths[EAST])
-			free_game_and_exit(game, "Erro: Textura EA duplicada.");
+			return (-9); // Error: duplicate EA texture
 		if (!check_texture_path(line + 3))
-			free_game_and_exit(game, "Erro: Caminho de textura EA inválido.");
+			return (-3);
 		game->texture_paths[EAST] = ft_strdup(line + 3);
 	}
 	else if (ft_strncmp(line, "F ", 2) == 0)
 	{
 	    if (map_started)
-		free_game_and_exit(game, "Erro: Cor do chão (F) definida após o início do mapa.");
+		return (-1);
 	    if (game->floor_color == -1) // ainda não definido
 		game->floor_color = parse_rgb(line + 2);
 	    else
-		free_game_and_exit(game, "Erro: Cor do chão (F) duplicada.");
+		return (-10); // duplicate floor color
 	    if (game->floor_color < 0)
-		free_game_and_exit(game, "Erro: Formato de cor do chão (F) inválido.");
+		return (-4); // invalid format
 	}
 	else if (ft_strncmp(line, "C ", 2) == 0)
 	{
 	    if (map_started)
-		free_game_and_exit(game, "Erro: Cor do teto (C) definida após o início do mapa.");
+		return (-1);
 	    if (game->ceiling_color == -1) // ainda não definido
 		game->ceiling_color = parse_rgb(line + 2);
 	    else
-		free_game_and_exit(game, "Erro: Cor do teto (C) duplicada.");
+		return (-11); // duplicate ceiling color
 	    if (game->ceiling_color < 0)
-		free_game_and_exit(game, "Erro: Formato de cor do teto (C) inválido.");
+		return (-4); // invalid format
 	}
 	else
 	{
 		// Se não for nenhum dos identificadores acima, deve ser uma linha de mapa
 		if (!is_valid_map_line(line))
-			free_game_and_exit(game, "Erro: Linha de mapa inválida.");
+			return (-5); // invalid map line
 		map_started = 1;
 		add_line_list(game, line);
 	}
+	return (0);
 }
 
 
@@ -345,7 +353,7 @@ int is_playable(char c)
 void	free_game_and_exit(t_game *game, const char *msg)
 {
 	if (msg)
-		printf("Erro: %s\n", msg);
+		printf("%s\n", msg);
 
 	free_textures(game);
 
@@ -540,6 +548,7 @@ void	parse_file(char *path, t_game *game)
 	char	*no_nl;
 	char	*tmp;
 	int		k;
+	int		result;
 
 	if (!is_valid_cub(path))
 	{
@@ -552,11 +561,15 @@ void	parse_file(char *path, t_game *game)
 		printf("Erro: não foi possível abrir o arquivo %s\n", path);
 		exit(EXIT_FAILURE);
 	}
+	line = NULL;
+	no_nl = NULL;
+	tmp = NULL;
 	while ((line = get_next_line(fd)))
 	{
 		/* remover apenas newline/carriage return — preserva espaços */
 		no_nl = ft_strtrim(line, "\n\r");
 		free(line);
+		line = NULL;
 		if (!no_nl)
 			continue;
 
@@ -568,8 +581,15 @@ void	parse_file(char *path, t_game *game)
 		/* linha vazia (apenas espaços) */
 		if (no_nl[k] == '\0')
 		{
-			parse_config_line(game, no_nl); /* a função retorna cedo para linha vazia */
+			result = parse_config_line(game, no_nl);
 			free(no_nl);
+			no_nl = NULL;
+			if (result < 0)
+			{
+				close(fd);
+				get_next_line(-1); // Clean up static buffer
+				free_game_and_exit(game, "Erro de parsing na linha vazia");
+			}
 			continue;
 		}
 
@@ -583,15 +603,52 @@ void	parse_file(char *path, t_game *game)
 			(no_nl[k] == 'C' && no_nl[k + 1] == ' '))
 		{
 			tmp = ft_strdup(no_nl + k);
-			parse_config_line(game, tmp);
+			result = parse_config_line(game, tmp);
 			free(tmp);
+			tmp = NULL;
 			free(no_nl);
+			no_nl = NULL;
+			if (result < 0)
+			{
+				close(fd);
+				get_next_line(-1); // Clean up static buffer
+				if (result == -1)
+					free_game_and_exit(game, "Erro: Configuração definida após o início do mapa.");
+				else if (result == -3)
+					free_game_and_exit(game, "Erro: Arquivo de textura não encontrado ou inválido (deve terminar com .xpm).");
+				else if (result == -4)
+					free_game_and_exit(game, "Erro: Formato de cor inválido (valores devem estar entre 0-255).");
+				else if (result == -6)
+					free_game_and_exit(game, "Erro: Textura Norte (NO) duplicada.");
+				else if (result == -7)
+					free_game_and_exit(game, "Erro: Textura Sul (SO) duplicada.");
+				else if (result == -8)
+					free_game_and_exit(game, "Erro: Textura Oeste (WE) duplicada.");
+				else if (result == -9)
+					free_game_and_exit(game, "Erro: Textura Leste (EA) duplicada.");
+				else if (result == -10)
+					free_game_and_exit(game, "Erro: Cor do chão (F) duplicada.");
+				else if (result == -11)
+					free_game_and_exit(game, "Erro: Cor do teto (C) duplicada.");
+				else
+					free_game_and_exit(game, "Erro de parsing na configuração");
+			}
 		}
 		else
 		{
 			/* é linha de mapa — preservamos espaços à esquerda e à direita */
-			parse_config_line(game, no_nl);
+			result = parse_config_line(game, no_nl);
 			free(no_nl);
+			no_nl = NULL;
+			if (result < 0)
+			{
+				close(fd);
+				get_next_line(-1); // Clean up static buffer
+				if (result == -5)
+					free_game_and_exit(game, "Erro: Caractere inválido encontrado na linha do mapa.");
+				else
+					free_game_and_exit(game, "Erro de parsing na linha de mapa");
+			}
 		}
 	}
 	close(fd);
