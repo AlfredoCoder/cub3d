@@ -1,6 +1,6 @@
 # Variáveis
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -g -fPIE
+CFLAGS = -Wall -Wextra -Werror -g
 MLX_DIR = ./minilibx-linux
 MLX_LIB = $(MLX_DIR)/libmlx.a
 MLX_FLAGS = -L$(MLX_DIR) -lmlx -lXext -lX11 -lm
@@ -9,8 +9,14 @@ SRC = src/main.c \
 	src/pixels.c \
 	src/comands.c \
 	src/moviment.c \
+	src/moviment_utils.c \
 	src/textures.c \
-        src/parsing.c
+	src/textures_draw.c \
+	src/textures_load.c \
+        src/parsing.c \
+        src/player_utils.c \
+        src/player_dir.c \
+        src/utils.c
 OBJ = $(SRC:.c=.o)
 NAME = cub3D
 LIBFT_PATH = lib
