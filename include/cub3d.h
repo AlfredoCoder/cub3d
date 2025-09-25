@@ -97,9 +97,9 @@ typedef struct s_draw_tex
 	int			x;
 	int			start;
 	int			end;
-	int			tex;
-	t_texture	*tex;
-	int			lineHeight;
+	int			tex_x;
+	t_texture	*texture;
+	int			line_height;
 	double		step;
 	double		tex_pos;
 }	t_draw_tex;
@@ -163,23 +163,30 @@ void	load_map(char *file, t_game *game);
 void	add_line_list(t_game *game, char *line);
 void	convert_list_to_map(t_game *game);
 void	free_map_list(t_lmapp *list);
+char	*pad_line(char *line, int target_width);
+int		parse_config_line(t_game *game, char *line);
+void	validate_map(t_game *game);
+void	validate_walls(t_game *game);
+void	validate_player(t_game *game);
 
 /*---------------------- PROTÓTIPOS: VALIDAÇÕES ------------------------*/
 
 int		is_valid_cub(char *argument);
 int		is_valid_map_line(char *line);
 int		is_valid_texture_path(char *line);
-int		find_max_width(char **map);
+int		check_texture_path(char *path);
 int		parse_color(char *str);
 int		parse_rgb(char *line);
 int		check_rgb_value(char *str, int *pos);
+char	get_char_at(t_game *game, int row, int col);
+int		is_playable(char c);
 
 /*------------------------- PROTÓTIPOS: TEXTURAS -------------------------*/
 
 int		load_textures(t_game *game);
 void	load_all_textures(t_game *game);
 void	free_textures(t_game *game);
-t_texture	*select_texture(t_game *game, int side);
+void	*select_texture(t_game *game, int side);
 
 /*---------------------- PROTÓTIPOS: MOVIMENTAÇÃO ------------------------*/
 
@@ -205,6 +212,8 @@ void	init_player(t_game *game);
 void	set_player_dir_and_plane(t_game *game, char dir);
 void	set_north(t_game *game);
 void	set_south(t_game *game);
+void	setup_mlx_hooks(t_game *game);
+int		init_mlx_resources(t_game *game);
 void	set_east(t_game *game);
 void	set_west(t_game *game);
 t_coord	get_player_position(t_game *game);
@@ -216,7 +225,7 @@ void	free_textures(t_game *game);
 void	free_game_and_exit(t_game *game, const char *msg);
 void	free_game_and_exit_xy(t_game *game, const char *msg, int i, int j);
 
-/*----------------------- PROTÓTIPOS: FERRAMENTAS DE DESENHO ------------------*/
+/*----------------------- PROTÓTIPOS: FERRAMENTAS DE DESENHO ----------------*/
 
 void	put_pixel(t_game *game, int x, int y, int color);
 double	get_step(int tex_height, int line_height);

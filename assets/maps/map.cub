@@ -1,13 +1,14 @@
-NO        assets/textures/parede2.xpm
+NO assets/textures/parede2.xpm
 SO assets/textures/parede2.xpm
 WE assets/textures/paredes.xpm
 EA assets/textures/paredes.xpm
 
 
 
-F 050, 0, 0
 
-C 100, 090 , 66
+F 50, -1, 0
+
+C 100, 90, 66
 
 
 

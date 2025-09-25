@@ -1,10 +1,11 @@
 # Variáveis
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -g
+CFLAGS = -Wall -Wextra -Werror 
 MLX_DIR = ./minilibx-linux
 MLX_LIB = $(MLX_DIR)/libmlx.a
 MLX_FLAGS = -L$(MLX_DIR) -lmlx -lXext -lX11 -lm
 SRC = src/main.c \
+        src/main_utils.c \
         src/render.c \
 	src/pixels.c \
 	src/comands.c \
@@ -14,6 +15,13 @@ SRC = src/main.c \
 	src/textures_draw.c \
 	src/textures_load.c \
         src/parsing.c \
+        src/parsing_validation.c \
+        src/parsing_validation2.c \
+        src/parsing_config.c \
+        src/parsing_map.c \
+        src/parsing_map2.c \
+        src/parsing_utils.c \
+        src/parsing_rgb.c \
         src/player_utils.c \
         src/player_dir.c \
         src/utils.c

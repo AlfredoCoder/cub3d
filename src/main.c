@@ -12,31 +12,34 @@
 
 #include "../include/cub3d.h"
 
-void	free_textures(t_game *game)
+static void	free_texture_paths(t_game *game)
 {
 	int	i;
 
-	if (!game)
-		return;
-
-	for (i = 0; i < 4; i++)
+	i = 0;
+	while (i < 4)
 	{
-		if (game->textures[i].img_ptr)
-		{
-			mlx_destroy_image(game->mlx, game->textures[i].img_ptr);
-			game->textures[i].img_ptr = NULL;
-		}
-		// Se tiver strings de caminhos duplicados
 		if (game->texture_paths[i])
 		{
 			free(game->texture_paths[i]);
 			game->texture_paths[i] = NULL;
 		}
+		i++;
 	}
+}
+
+static void	free_game_map(t_game *game)
+{
+	int	i;
+
 	if (game->map)
 	{
-		for (i = 0; i < game->map_height; i++)
+		i = 0;
+		while (i < game->map_height)
+		{
 			free(game->map[i]);
+			i++;
+		}
 		free(game->map);
 		game->map = NULL;
 	}
@@ -47,7 +50,25 @@ void	free_textures(t_game *game)
 	}
 }
 
+void	free_textures(t_game *game)
+{
+	int	i;
 
+	if (!game)
+		return ;
+	i = 0;
+	while (i < 4)
+	{
+		if (game->textures[i].img_ptr)
+		{
+			mlx_destroy_image(game->mlx, game->textures[i].img_ptr);
+			game->textures[i].img_ptr = NULL;
+		}
+		i++;
+	}
+	free_texture_paths(game);
+	free_game_map(game);
+}
 
 int	close_game(t_game *game)
 {
@@ -64,21 +85,6 @@ int	close_game(t_game *game)
 	exit(0);
 }
 
-
-int	close_window(void *param)
-{
-	(void)param;
-	exit(0);
-	return (0);
-}
-
-int	supdate(t_game *game)
-{
-	input_key(game);
-	render(game);
-	return (0);
-}
-
 int	main(int ac, char **av)
 {
 	t_game	game;
@@ -87,25 +93,12 @@ int	main(int ac, char **av)
 	game.floor_color = -1;
 	game.ceiling_color = -1;
 	if (ac != 2)
-		return (printf("erro deve passar um argumento como mapa"), 0);
+		return (printf("erro deve passar um argumento como mapa"), (0));
 	parse_file(av[1], &game);
 	game.player_pos = get_player_position(&game);
-	game.mlx = mlx_init();
-	if (game.mlx == NULL)
-	{
-		free_textures(&game);
-		return 0;
-	}
-	game.win = mlx_new_window(game.mlx, WIDTH, HEIGHT, "Cub3d");
-	game.img = mlx_new_image(game.mlx, WIDTH, HEIGHT);
-	game.addr = mlx_get_data_addr(game.img, &game.bpp, &game.size_line, &game.endian);
-	if (!load_textures(&game))
-		return (printf("Falha ao carregar texturas\n"), 1);
-	mlx_hook(game.win, 2, 1L << 0, &key_handler, &game);
-	mlx_hook(game.win, 3, 1L << 1, &restart_key, &game);
-	mlx_hook(game.win, 17, 0, close_game, &game); // Fechar com o botão X
-	mlx_loop_hook(game.mlx, &supdate, &game);
+	if (!init_mlx_resources(&game))
+		return (0);
+	setup_mlx_hooks(&game);
 	mlx_loop(game.mlx);
 	return (0);
 }
-

@@ -88,7 +88,14 @@ char	*get_next_line(int fd)
 	static char	*backup;
 
 	if (fd < 0 || BUFFER_SIZE < 1)
+	{
+		if (fd < 0 && backup)
+		{
+			free(backup);
+			backup = NULL;
+		}
 		return (NULL);
+	}
 	backup = read_file(fd, backup);
 	if (!backup)
 		return (NULL);

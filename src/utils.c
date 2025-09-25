@@ -11,15 +11,3 @@
 /* ************************************************************************** */
 
 #include "../include/cub3d.h"
-
-void	free_textures(t_game *game)
-{
-	int	i;
-
-	i = 0;
-	while (i < 4)
-	{
-		mlx_destroy_image(game->mlx, game->textures[i].img_ptr);
-		i++;
-	}
-}

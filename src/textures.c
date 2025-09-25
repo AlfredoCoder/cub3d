@@ -50,9 +50,10 @@ void	draw_texture_column(t_game *game, t_draw_tex draw)
 		tex_pos += draw.step;
 		if (tex_y < 0)
 			tex_y = 0;
-		if (tex_y >= draw.tex->height)
-			tex_y = draw.tex->height - 1;
-		color = ((int *)draw.tex->data)[tex_y * draw.tex->width + draw.texX];
+		if (tex_y >= draw.texture->height)
+			tex_y = draw.texture->height - 1;
+		color = ((int *)draw.texture->data)[tex_y * draw.texture->width
+			+ draw.tex_x];
 		put_pixel(game, draw.x, y, color);
 		y++;
 	}
