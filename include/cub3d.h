@@ -186,7 +186,7 @@ int		is_playable(char c);
 int		load_textures(t_game *game);
 void	load_all_textures(t_game *game);
 void	free_textures(t_game *game);
-void	*select_texture(t_game *game, int side);
+t_texture	*select_texture(t_game *game, int side);
 
 /*---------------------- PROTÓTIPOS: MOVIMENTAÇÃO ------------------------*/
 
@@ -224,6 +224,10 @@ void	free_game(t_game *game);
 void	free_textures(t_game *game);
 void	free_game_and_exit(t_game *game, const char *msg);
 void	free_game_and_exit_xy(t_game *game, const char *msg, int i, int j);
+int		process_line(t_game *game, char *no_nl, int k);
+void	handle_parse_error(t_game *game, int result);
+int		handle_floor_color(t_game *game, char *line);
+int		handle_ceiling_color(t_game *game, char *line);
 
 /*----------------------- PROTÓTIPOS: FERRAMENTAS DE DESENHO ----------------*/
 

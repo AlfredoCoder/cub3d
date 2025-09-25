@@ -18,6 +18,9 @@ SRC = src/main.c \
         src/parsing_validation.c \
         src/parsing_validation2.c \
         src/parsing_config.c \
+        src/parsing_colors.c \
+        src/parsing_error.c \
+        src/parsing_line.c \
         src/parsing_map.c \
         src/parsing_map2.c \
         src/parsing_utils.c \

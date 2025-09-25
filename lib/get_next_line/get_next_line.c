@@ -77,7 +77,14 @@ static char	*read_file(int fd, char *backup)
 	}
 	free(buffer);
 	if (read_bytes < 0)
+	{
+		if (backup)
+		{
+			free(backup);
+			backup = NULL;
+		}
 		return (NULL);
+	}
 	else
 		return (backup);
 }
@@ -89,7 +96,7 @@ char	*get_next_line(int fd)
 
 	if (fd < 0 || BUFFER_SIZE < 1)
 	{
-		if (fd < 0 && backup)
+		if (backup)
 		{
 			free(backup);
 			backup = NULL;

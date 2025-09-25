@@ -12,22 +12,12 @@
 
 #include "../include/cub3d.h"
 
-void	free_game_and_exit(t_game *game, const char *msg)
+static void	free_game_map_data(t_game *game)
 {
-	if (msg)
-		printf("%s\n", msg);
-	if (game->texture_paths[0])
-		free(game->texture_paths[0]);
-	if (game->texture_paths[1])
-		free(game->texture_paths[1]);
-	if (game->texture_paths[2])
-		free(game->texture_paths[2]);
-	if (game->texture_paths[3])
-		free(game->texture_paths[3]);
+	int	i;
+
 	if (game->map)
 	{
-		int	i;
-
 		i = 0;
 		while (i < game->map_height && game->map[i])
 		{
@@ -42,6 +32,22 @@ void	free_game_and_exit(t_game *game, const char *msg)
 		free_map_list(game->lmap);
 		game->lmap = NULL;
 	}
+}
+
+void	free_game_and_exit(t_game *game, const char *msg)
+{
+	if (msg)
+		printf("%s\n", msg);
+	get_next_line(-1);
+	if (game->texture_paths[0])
+		free(game->texture_paths[0]);
+	if (game->texture_paths[1])
+		free(game->texture_paths[1]);
+	if (game->texture_paths[2])
+		free(game->texture_paths[2]);
+	if (game->texture_paths[3])
+		free(game->texture_paths[3]);
+	free_game_map_data(game);
 	exit(EXIT_FAILURE);
 }
 
